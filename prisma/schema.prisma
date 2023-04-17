@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://"
+}
+
+model channelconfiguration {
+  Id                          Int                           @id @unique(map: "Id") @default(autoincrement())
+  EntityId                    Int
+  Name                        String?                       @db.VarChar(200)
+  CreatedAt                   DateTime                      @default(now()) @db.DateTime(0)
+  Active                      Boolean                       @default(dbgenerated("b'1'")) @db.Bit(1)
+  DeletedAt                   DateTime?                     @db.DateTime(0)
+  entityemailconfiguration    entityemailconfiguration[]
+  entitysmsconfiguration      entitysmsconfiguration[]
+  entitywhatsappconfiguration entitywhatsappconfiguration[]
+
+  @@index([EntityId], map: "idx_entityId")
+}
+
+model entityemailconfiguration {
+  Id                      Int                   @id @default(autoincrement())
+  EntityId                Int
+  CreatedAt               DateTime              @default(now()) @db.DateTime(0)
+  Subject                 String?               @db.VarChar(200)
+  Text                    String?               @db.VarChar(200)
+  ValidationId            Int                   @db.TinyInt
+  TemplateId              String                @db.VarChar(50)
+  Origin                  String?               @db.VarChar(320)
+  TokenExpirationTime     Int?
+  TimeToSendNewValidation Int
+  Active                  Boolean               @default(dbgenerated("b'1'")) @db.Bit(1)
+  EmailSendLimit          Int
+  ChannelId               Int?
+  channelconfiguration    channelconfiguration? @relation(fields: [ChannelId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "entityemailconfiguration_ibfk_1")
+
+  @@index([ChannelId], map: "ChannelId")
+  @@index([ValidationId], map: "ValidationId")
+  @@index([EntityId, ValidationId], map: "idx_entityId_validationId")
+  @@index([EntityId, ValidationId, ChannelId], map: "idx_entityId_validationId_channelId")
+}
+
+model entitymockconfiguration {
+  Id        Int       @id @default(autoincrement())
+  EntityId  Int
+  Active    Boolean?  @default(false)
+  CreatedAt DateTime? @default(now()) @db.DateTime(0)
+}
+
+model entitymoduleconfiguration {
+  Id        Int      @id @default(autoincrement())
+  EntityId  Int
+  Module    String   @db.VarChar(50)
+  Hidden    Boolean
+  Clickable Boolean
+  Checked   Boolean
+  CreatedAt DateTime @default(now()) @db.DateTime(0)
+
+  @@index([EntityId], map: "idx_entityId")
+}
+
+model entitymodulepreference {
+  Id        Int      @id @default(autoincrement())
+  EntityId  Int
+  Module    String   @db.VarChar(50)
+  CreatedAt DateTime @default(now()) @db.DateTime(0)
+
+  @@index([EntityId], map: "idx_entityId")
+}
+
+model entitysmsconfiguration {
+  Id                    Int                   @id @default(autoincrement())
+  EntityId              Int
+  CreatedAt             DateTime?             @default(now()) @db.DateTime(0)
+  Text                  String?               @db.VarChar(300)
+  Active                Boolean               @db.Bit(1)
+  ExpirationTime        Int
+  SmsTokenResponseLimit Int
+  ValidationId          Int?                  @db.TinyInt
+  SmsSendLimit          Int?                  @default(3)
+  ChannelId             Int?
+  validation            validation?           @relation(fields: [ValidationId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "entitysmsconfiguration_ibfk_1")
+  channelconfiguration  channelconfiguration? @relation(fields: [ChannelId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "entitysmsconfiguration_ibfk_2")
+
+  @@index([ChannelId], map: "ChannelId")
+  @@index([ValidationId], map: "ValidationId")
+  @@index([EntityId, ValidationId, Active], map: "idx_entityId_validationId_active")
+  @@index([EntityId, ValidationId, Active, ChannelId], map: "idx_entityId_validationId_active_channelId")
+}
+
+model entitywhatsappconfiguration {
+  Id                   Int                   @id @default(autoincrement())
+  EntityId             Int
+  CreatedAt            DateTime              @default(now()) @db.DateTime(0)
+  ExpirationTime       Int?                  @default(120)
+  Active               Boolean               @default(dbgenerated("b'1'")) @db.Bit(1)
+  SendLimit            Int                   @default(2)
+  ChannelId            Int?
+  EntityRequester      String                @db.VarChar(50)
+  channelconfiguration channelconfiguration? @relation(fields: [ChannelId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "entitywhatsappconfiguration_ibfk_1")
+
+  @@index([ChannelId], map: "ChannelId")
+  @@index([EntityId, ChannelId], map: "idx_entityId_channelId")
+}
+
+model microfrontmodules {
+  Id      Int     @id @default(autoincrement()) @db.TinyInt
+  Name    String? @db.VarChar(255)
+  PathDEV String? @db.Text
+  Route   String? @db.VarChar(255)
+  Local   String? @db.VarChar(255)
+  Order   Int?    @db.TinyInt
+  Type    String? @db.VarChar(255)
+  PathQA  String? @db.VarChar(255)
+  PathPRD String? @db.VarChar(255)
+  PathSWP String? @db.VarChar(255)
+}
+
+model smstokenresponse {
+  Id            Int         @id @default(autoincrement())
+  TransactionId String      @db.VarChar(50)
+  Value         String      @db.VarChar(10)
+  StatusId      Int         @db.TinyInt
+  CreatedAt     DateTime    @db.DateTime(0)
+  tokenstatus   tokenstatus @relation(fields: [StatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "smstokenresponse_ibfk_1")
+
+  @@index([StatusId], map: "StatusId")
+}
+
+model smstype {
+  Id   Int    @id @default(autoincrement()) @db.TinyInt
+  Name String @db.VarChar(50)
+}
+
+model tokenstatus {
+  Id               Int                @id @default(autoincrement()) @db.TinyInt
+  Name             String             @db.VarChar(15)
+  smstokenresponse smstokenresponse[]
+}
+
+model transactionemail {
+  Id             Int        @id @default(autoincrement())
+  TransactionId  String     @db.VarChar(50)
+  CreatedAt      DateTime   @default(now()) @db.DateTime(0)
+  EntityId       Int
+  Code           String     @db.VarChar(50)
+  ValidationId   Int        @db.TinyInt
+  TemplateId     String     @db.VarChar(50)
+  ExpirationDate DateTime?  @default(now()) @db.DateTime(0)
+  Answer         String?    @db.VarChar(50)
+  validation     validation @relation(fields: [ValidationId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "transactionemail_ibfk_1")
+
+  @@index([ValidationId], map: "ValidationId")
+}
+
+model transactionsmstoken {
+  Id             Int      @id @default(autoincrement())
+  TransactionId  String   @db.VarChar(50)
+  CreatedAt      DateTime @db.DateTime(0)
+  ExpirationDate DateTime @db.DateTime(0)
+  Value          String   @db.VarChar(10)
+}
+
+model validation {
+  Id                     Int                      @id @default(autoincrement()) @db.TinyInt
+  Name                   String                   @db.VarChar(50)
+  entitysmsconfiguration entitysmsconfiguration[]
+  transactionemail       transactionemail[]
+}

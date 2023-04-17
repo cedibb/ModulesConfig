@@ -1,0 +1,249 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "description": "",
+    "contact": {
+      "name": "Carlos Dibb",
+      "email": ""
+    },
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Modules",
+      "description": "Module operations"
+    }
+  ],
+  "paths": {
+    "/api/module": {
+      "get": {
+        "tags": ["Modules"],
+        "summary": "Show all modules",
+        "description": "Returns the list of registered modules",
+        "parameters": [
+          {
+            "name": "server",
+            "in": "query",
+            "description": "Server to importmap",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Importmap",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OutputModule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Modules"],
+        "summary": "Register module",
+        "description": "Register a new module",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InputModule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registered module",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputModule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/module/{moduleId}": {
+      "get": {
+        "tags": ["Modules"],
+        "summary": "Show single modules",
+        "description": "Returns the information of a registered module",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/moduleIdQueryParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of modules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputModule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Modules"],
+        "summary": "Modify module",
+        "description": "Modify module data",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/moduleIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InputModule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Modified module",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputModule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Modules"],
+        "summary": "Unregister module",
+        "description": "Unregister a module",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/moduleIdQueryParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unregistered module",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputModule"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "moduleIdQueryParam": {
+        "name": "moduleId",
+        "in": "path",
+        "schema": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "required": true,
+        "example": 1
+      }
+    },
+
+    "schemas": {
+      "BaseModule": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "example": "nomemodulov1"
+          },
+          "PathDEV": {
+            "type": "string",
+            "example": "path/to/devmodule"
+          },
+          "PathPRD": {
+            "type": "string",
+            "example": "path/to/prdmodule"
+          },
+          "PathQA": {
+            "type": "string",
+            "example": "path/to/qamodule"
+          },
+          "PathSWP": {
+            "type": "string",
+            "example": "path/to/swpmodule"
+          },
+          "Route": {
+            "type": "string",
+            "example": "route/to/module"
+          },
+          "Local": {
+            "type": "string",
+            "example": "local/module"
+          },
+          "Type": {
+            "type": "string",
+            "example": "moduke-type"
+          },
+          "Order": {
+            "type": "integer",
+            "format": "int64",
+            "example": 3
+          }
+        }
+      },
+      "OutputModule": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 10
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/BaseModule"
+          }
+        ]
+      },
+      "InputModule": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": ["Name", "Path", "Route", "Local", "Order"]
+          },
+          {
+            "$ref": "#/components/schemas/BaseModule"
+          }
+        ]
+      }
+    }
+  }
+}
